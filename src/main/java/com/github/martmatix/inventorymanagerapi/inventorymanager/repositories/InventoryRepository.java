@@ -4,10 +4,13 @@ import com.github.martmatix.inventorymanagerapi.inventorymanager.entities.Invent
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface InventoryRepository extends JpaRepository<InventoryEntity, UUID> {
 
     List<InventoryEntity> findAllByUserId(String userId);
+
+    Optional<InventoryEntity> findById(UUID id);
 
 }

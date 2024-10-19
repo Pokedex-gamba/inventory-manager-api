@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class InventoryService {
@@ -31,8 +33,16 @@ public class InventoryService {
         inventoryRepository.save(inventoryEntity);
     }
 
+    public void updateInventoryEntity(InventoryEntity inventoryEntity) {
+        inventoryRepository.save(inventoryEntity);
+    }
+
     public List<InventoryEntity> getPlayersInventory(String userId) {
         return inventoryRepository.findAllByUserId(userId);
+    }
+
+    public Optional<InventoryEntity> getEntityById(UUID inventoryId) {
+        return inventoryRepository.findById(inventoryId);
     }
 
     @Autowired

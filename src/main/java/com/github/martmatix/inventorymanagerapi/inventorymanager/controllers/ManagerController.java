@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -22,6 +23,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.security.PublicKey;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -74,6 +77,38 @@ public class ManagerController {
 
             List<InventoryEntity> gambaByUserId = inventoryService.getPlayersInventory(userId);
             return ResponseEntity.ok(gambaByUserId);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"error\": \"Internal Server Error: " + e.getMessage() + "\"}");
+        }
+    }
+
+    @GetMapping(path = "/pokemon/inventory/changeOwner")
+    public ResponseEntity<?> changeOwnership(@RequestParam("inventory") String inventoryId, @RequestParam("user") String newUserId, @RequestHeader("Authorization") String authHeader) {
+        try {
+            if (inventoryId == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"error\": \"Inventory ID Is Missing In Request\"}");
+            }
+
+            if (newUserId.trim().isEmpty() || newUserId.trim().isBlank()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"error\": \"User ID Is Missing In Request\"}");
+            }
+
+            String userId = getUserIdFromToken(authHeader);
+            if (userId.equals(ErrorCodes.TOKEN_EXTRACTION_ERROR.getCode())) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"error\": \"Unable To Process Request: " + ErrorCodes.TOKEN_EXTRACTION_ERROR.getCode() + "\"}");
+            }
+            if (userId.equals(ErrorCodes.PUBLIC_NOT_FOUND.getCode())) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"error\": \"Unable To Process Request: " + ErrorCodes.PUBLIC_NOT_FOUND.getCode() + "\"}");
+            }
+
+            Optional<InventoryEntity> inventoryEntity = inventoryService.getEntityById(UUID.fromString(inventoryId));
+            if (inventoryEntity.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).body("{\"warning\": \"No Content: Inventory with this ID does not exist\"}");
+            }
+            inventoryEntity.get().setUserId(newUserId);
+            inventoryService.updateInventoryEntity(inventoryEntity.get());
+
+            return ResponseEntity.ok("{\"ok\": \"Inventory Updated\"}");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"error\": \"Internal Server Error: " + e.getMessage() + "\"}");
         }

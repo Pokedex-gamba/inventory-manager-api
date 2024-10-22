@@ -9,8 +9,10 @@ import com.github.martmatix.inventorymanagerapi.inventorymanager.services.KeyLoa
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.sql.DataSource;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -33,6 +36,8 @@ public class ManagerController {
     private FromGambaService fromGambaService;
     private InventoryService inventoryService;
     private KeyLoaderService keyLoaderService;
+
+    private DataSource dataSource;
 
     @GetMapping(path = "/pokemon/inventory/getFromGamba")
     public ResponseEntity<?> getPokemonFromGamba(@RequestHeader("Authorization") String authHeader) {
@@ -114,6 +119,27 @@ public class ManagerController {
         }
     }
 
+    @GetMapping(path = "/pokemon/inventory/clearDb")
+    public ResponseEntity<?> clearDb(@RequestHeader("Authorization") String authHeader) {
+        try {
+            String userId = getUserIdFromToken(authHeader);
+            if (userId.equals(ErrorCodes.TOKEN_EXTRACTION_ERROR.getCode())) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"error\": \"Unable To Process Request: " + ErrorCodes.TOKEN_EXTRACTION_ERROR.getCode() + "\"}");
+            }
+            if (userId.equals(ErrorCodes.PUBLIC_NOT_FOUND.getCode())) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"error\": \"Unable To Process Request: " + ErrorCodes.PUBLIC_NOT_FOUND.getCode() + "\"}");
+            }
+
+            ClassPathResource classPathResource = new ClassPathResource("initDatabase.sql");
+            ResourceDatabasePopulator databasePopulator = new ResourceDatabasePopulator(classPathResource);
+            databasePopulator.execute(dataSource);
+
+            return ResponseEntity.ok("{\"ok\": \"Database Cleared And Initialized Successfully\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"error\": \"Internal Server Error: " + e.getMessage() + "\"}");
+        }
+    }
+
     private String getUserIdFromToken(String authHeader) {
         String token = authHeader.replace("Bearer", "").trim();
 
@@ -155,5 +181,10 @@ public class ManagerController {
     @Autowired
     public void setKeyLoaderService(KeyLoaderService keyLoaderService) {
         this.keyLoaderService = keyLoaderService;
+    }
+
+    @Autowired
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 }

@@ -3,7 +3,6 @@ package com.github.martmatix.inventorymanagerapi.inventorymanager.controllers;
 import com.github.martmatix.inventorymanagerapi.inventorymanager.constants.ErrorCodes;
 import com.github.martmatix.inventorymanagerapi.inventorymanager.dtos.PokemonFromGambaDTO;
 import com.github.martmatix.inventorymanagerapi.inventorymanager.entities.InventoryEntity;
-import com.github.martmatix.inventorymanagerapi.inventorymanager.services.FromGambaService;
 import com.github.martmatix.inventorymanagerapi.inventorymanager.services.InventoryService;
 import com.github.martmatix.inventorymanagerapi.inventorymanager.services.KeyLoaderService;
 import io.jsonwebtoken.Claims;
@@ -13,12 +12,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import org.springframework.web.bind.annotation.*;
 
 import javax.sql.DataSource;
 import java.io.BufferedReader;
@@ -33,14 +27,13 @@ import java.util.stream.Collectors;
 @RestController
 public class ManagerController {
 
-    private FromGambaService fromGambaService;
     private InventoryService inventoryService;
     private KeyLoaderService keyLoaderService;
 
     private DataSource dataSource;
 
-    @GetMapping(path = "/pokemon/inventory/getFromGamba")
-    public ResponseEntity<?> getPokemonFromGamba(@RequestHeader("Authorization") String authHeader) {
+    @PostMapping(path = "/pokemon/inventory/saveGamba")
+    public ResponseEntity<?> saveGamba(@RequestHeader("Authorization") String authHeader, @RequestBody PokemonFromGambaDTO pokemon) {
         try {
             String userId = getUserIdFromToken(authHeader);
             if (userId.equals(ErrorCodes.TOKEN_EXTRACTION_ERROR.getCode())) {
@@ -50,19 +43,8 @@ public class ManagerController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"error\": \"Unable To Process Request: " + ErrorCodes.PUBLIC_NOT_FOUND.getCode() + "\"}");
             }
 
-            Flux<PokemonFromGambaDTO> pokemonFlux = fromGambaService.getPokemonFromGamba(authHeader);
-            Mono<List<PokemonFromGambaDTO>> pokemonMono = pokemonFlux.collectList();
+            inventoryService.saveInventoryEntity(pokemon);
 
-            List<PokemonFromGambaDTO> pokemons = pokemonMono.block();
-            if (pokemons == null) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"error\": \"Internal Server Error: Unable To Fetch Pokemons\"}");
-            }
-
-            if (pokemons.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).body("{\"warning\": \"No Content: Gamba Returned No Pokemon\"}");
-            }
-
-            inventoryService.saveInventoryEntity(pokemons.get(0));
             return ResponseEntity.ok("{\"ok\": \"Pokemon Saved To Database\"}");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"error\": \"Internal Server Error: " + e.getMessage() + "\"}");
@@ -166,11 +148,6 @@ public class ManagerController {
         }
 
         return userId;
-    }
-
-    @Autowired
-    public void setFromGambaService(FromGambaService fromGambaService) {
-        this.fromGambaService = fromGambaService;
     }
 
     @Autowired

@@ -6,9 +6,12 @@ import com.github.martmatix.inventorymanagerapi.inventorymanager.repositories.In
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class InventoryService {
@@ -43,6 +46,16 @@ public class InventoryService {
 
     public Optional<InventoryEntity> getEntityById(UUID inventoryId) {
         return inventoryRepository.findById(inventoryId);
+    }
+
+    public Map<String, BigDecimal> findUserTotal() {
+        List<Object[]> userTotal = inventoryRepository.findUserTotal();
+
+        return userTotal.stream()
+                .collect(Collectors.toMap(
+                        row -> ((String) row[0]),
+                        row -> (BigDecimal) row[1]
+                ));
     }
 
     @Autowired

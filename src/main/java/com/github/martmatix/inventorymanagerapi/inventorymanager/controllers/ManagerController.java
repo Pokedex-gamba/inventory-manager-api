@@ -86,6 +86,19 @@ public class ManagerController {
         return ResponseEntity.ok(inventoryEntity.get());
     }
 
+    @GetMapping(path = "/pokemon/inventory/getUserTotal")
+    public ResponseEntity<?> getUserTotal(@RequestHeader("Authorization") String authHeader) {
+        String userId = getUserIdFromToken(authHeader);
+        if (userId.equals(ErrorCodes.TOKEN_EXTRACTION_ERROR.getCode())) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"error\": \"Unable To Process Request: " + ErrorCodes.TOKEN_EXTRACTION_ERROR.getCode() + "\"}");
+        }
+        if (userId.equals(ErrorCodes.PUBLIC_NOT_FOUND.getCode())) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"error\": \"Unable To Process Request: " + ErrorCodes.PUBLIC_NOT_FOUND.getCode() + "\"}");
+        }
+
+        return ResponseEntity.ok(inventoryService.findUserTotal());
+    }
+
     @GetMapping(path = "/pokemon/inventory/changeOwner")
     public ResponseEntity<?> changeOwnership(@RequestParam("inventory") String inventoryId, @RequestParam("user") String newUserId, @RequestHeader("Authorization") String authHeader) {
         try {

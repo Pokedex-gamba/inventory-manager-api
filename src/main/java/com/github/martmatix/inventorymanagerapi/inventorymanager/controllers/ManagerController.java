@@ -64,6 +64,28 @@ public class ManagerController {
         }
     }
 
+    @GetMapping(path = "/pokemon/inventory/getInventoryById")
+    public ResponseEntity<?> getInventoryById(@RequestHeader("Authorization") String authHeader, @RequestParam("inventory") String inventoryId) {
+        if (inventoryId == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"error\": \"Inventory ID Is Missing In Request\"}");
+        }
+
+        String userId = getUserIdFromToken(authHeader);
+        if (userId.equals(ErrorCodes.TOKEN_EXTRACTION_ERROR.getCode())) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"error\": \"Unable To Process Request: " + ErrorCodes.TOKEN_EXTRACTION_ERROR.getCode() + "\"}");
+        }
+        if (userId.equals(ErrorCodes.PUBLIC_NOT_FOUND.getCode())) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"error\": \"Unable To Process Request: " + ErrorCodes.PUBLIC_NOT_FOUND.getCode() + "\"}");
+        }
+
+        Optional<InventoryEntity> inventoryEntity = inventoryService.getEntityById(UUID.fromString(inventoryId));
+        if (inventoryEntity.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("{\"warning\": \"No Content: Inventory with this ID does not exist\"}");
+        }
+
+        return ResponseEntity.ok(inventoryEntity.get());
+    }
+
     @GetMapping(path = "/pokemon/inventory/changeOwner")
     public ResponseEntity<?> changeOwnership(@RequestParam("inventory") String inventoryId, @RequestParam("user") String newUserId, @RequestHeader("Authorization") String authHeader) {
         try {

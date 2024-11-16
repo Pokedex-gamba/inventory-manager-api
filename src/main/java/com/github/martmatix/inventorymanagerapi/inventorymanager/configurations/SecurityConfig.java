@@ -24,6 +24,7 @@ public class SecurityConfig {
                         .requestMatchers("/pokemon/inventory/saveGamba").hasAuthority("svc::inventory_api::route::/pokemon/saveGamba")
                         .requestMatchers("/pokemon/inventory/changeOwner").hasAuthority("svc::inventory_api::route::/pokemon/changeOwner")
                         .requestMatchers("/pokemon/inventory/getInventory").hasAuthority("svc::inventory_api::route::/pokemon/getInventory")
+                        .requestMatchers("/pokemon/inventory/getInventoryById").hasAuthority("svc::inventory_api::route::/pokemon/getInventory")
                 )
                 .csrf(AbstractHttpConfigurer::disable)
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {

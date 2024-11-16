@@ -18,6 +18,7 @@ services:
 
   db-inventory:
     image: mysql:8.0
+    build: ./database
     ports:
       - "3307:3306"
     environment:

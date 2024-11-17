@@ -40,7 +40,7 @@ public class ManagerController {
 
             inventoryService.saveInventoryEntity(pokemon);
 
-            return ResponseEntity.ok("{\"ok\": \"Pokemon Saved To Database\"}");
+            return ResponseEntity.ok(pokemon);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"error\": \"Internal Server Error: " + e.getMessage() + "\"}");
         }

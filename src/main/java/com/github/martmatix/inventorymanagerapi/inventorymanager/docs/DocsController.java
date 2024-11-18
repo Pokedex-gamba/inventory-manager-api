@@ -8,7 +8,7 @@ public class DocsController {
 
     @GetMapping(path = "/docs")
     public String returnDocs() {
-        return "/docs";
+        return "docs";
     }
 
 }

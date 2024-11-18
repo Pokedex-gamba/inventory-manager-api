@@ -1,12 +1,17 @@
 package com.github.martmatix.inventorymanagerapi.inventorymanager.controllers;
 
 import com.github.martmatix.inventorymanagerapi.inventorymanager.constants.ErrorCodes;
+import com.github.martmatix.inventorymanagerapi.inventorymanager.docs.UserTotalResponse;
 import com.github.martmatix.inventorymanagerapi.inventorymanager.dtos.PokemonFromGambaDTO;
 import com.github.martmatix.inventorymanagerapi.inventorymanager.entities.InventoryEntity;
 import com.github.martmatix.inventorymanagerapi.inventorymanager.services.InventoryService;
 import com.github.martmatix.inventorymanagerapi.inventorymanager.services.KeyLoaderService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +51,12 @@ public class ManagerController {
         }
     }
 
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = InventoryEntity.class))
+            )
+    })
     @GetMapping(path = "/pokemon/inventory/getInventory")
     public ResponseEntity<?> getUserGamba(@RequestHeader("Authorization") String authHeader) {
         try {
@@ -64,28 +75,11 @@ public class ManagerController {
         }
     }
 
-    @GetMapping(path = "/pokemon/inventory/getInventoryById")
-    public ResponseEntity<?> getInventoryById(@RequestHeader("Authorization") String authHeader, @RequestParam("inventory") String inventoryId) {
-        if (inventoryId == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"error\": \"Inventory ID Is Missing In Request\"}");
-        }
-
-        String userId = getUserIdFromToken(authHeader);
-        if (userId.equals(ErrorCodes.TOKEN_EXTRACTION_ERROR.getCode())) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"error\": \"Unable To Process Request: " + ErrorCodes.TOKEN_EXTRACTION_ERROR.getCode() + "\"}");
-        }
-        if (userId.equals(ErrorCodes.PUBLIC_NOT_FOUND.getCode())) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"error\": \"Unable To Process Request: " + ErrorCodes.PUBLIC_NOT_FOUND.getCode() + "\"}");
-        }
-
-        Optional<InventoryEntity> inventoryEntity = inventoryService.getEntityById(UUID.fromString(inventoryId));
-        if (inventoryEntity.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("{\"warning\": \"No Content: Inventory with this ID does not exist\"}");
-        }
-
-        return ResponseEntity.ok(inventoryEntity.get());
-    }
-
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = UserTotalResponse.class)))
+    })
     @GetMapping(path = "/pokemon/inventory/getUserTotal")
     public ResponseEntity<?> getUserTotal(@RequestHeader("Authorization") String authHeader) {
         String userId = getUserIdFromToken(authHeader);
@@ -99,6 +93,12 @@ public class ManagerController {
         return ResponseEntity.ok(inventoryService.findUserTotal());
     }
 
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = InventoryEntity.class))
+            )
+    })
     @GetMapping(path = "/pokemon/inventory/getUserInventory")
     public ResponseEntity<?> getUserInventory(@RequestHeader("Authorization") String authHeader, @RequestParam("userId") String userId) {
         String tokenId = getUserIdFromToken(authHeader);
@@ -112,6 +112,12 @@ public class ManagerController {
         return ResponseEntity.ok(inventoryService.getPlayersInventory(userId));
     }
 
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    content = @Content(mediaType = "application/json",
+                    schema = @Schema(example = "{\"ok\": \"Inventory Updated\"}"))
+            )
+    })
     @GetMapping(path = "/pokemon/inventory/changeOwner")
     public ResponseEntity<?> changeOwnership(@RequestParam("inventory") String inventoryId, @RequestParam("user") String newUserId, @RequestHeader("Authorization") String authHeader) {
         try {

@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+<head>
+    <title>Scalar</title>
+    <meta charset="utf-8"/>
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1"/>
+</head>
+<body>
+
+<script
+        id="api-reference"
+        type="application/json">
+    {"openapi":"3.0.1","info":{"title":"OpenAPI definition","version":"v0"},"servers":[{"url":"http://localhost","description":"Generated server url"}],"paths":{"/pokemon/inventory/saveGamba":{"post":{"tags":["manager-controller"],"operationId":"saveGamba","parameters":[{"name":"Authorization","in":"header","required":true,"schema":{"type":"string"}}],"requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/PokemonFromGambaDTO"}}},"required":true},"responses":{"200":{"description":"OK","content":{"*/*":{"schema":{"type":"object"}}}}}}},"/pokemon/inventory/getUserTotal":{"get":{"tags":["manager-controller"],"operationId":"getUserTotal","parameters":[{"name":"Authorization","in":"header","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"OK","content":{"application/json":{"schema":{"$ref":"#/components/schemas/UserTotalResponse"}}}}}}},"/pokemon/inventory/getUserInventory":{"get":{"tags":["manager-controller"],"operationId":"getUserInventory","parameters":[{"name":"Authorization","in":"header","required":true,"schema":{"type":"string"}},{"name":"userId","in":"query","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"OK","content":{"application/json":{"schema":{"$ref":"#/components/schemas/InventoryEntity"}}}}}}},"/pokemon/inventory/getInventory":{"get":{"tags":["manager-controller"],"operationId":"getUserGamba","parameters":[{"name":"Authorization","in":"header","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"OK","content":{"application/json":{"schema":{"$ref":"#/components/schemas/InventoryEntity"}}}}}}},"/pokemon/inventory/changeOwner":{"get":{"tags":["manager-controller"],"operationId":"changeOwnership","parameters":[{"name":"inventory","in":"query","required":true,"schema":{"type":"string"}},{"name":"user","in":"query","required":true,"schema":{"type":"string"}},{"name":"Authorization","in":"header","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"OK","content":{"application/json":{"schema":{"type":"string","example":{"ok":"Inventory Updated"}}}}}}}}},"components":{"schemas":{"PokemonFromGambaDTO":{"type":"object","properties":{"id":{"type":"string","format":"uuid"},"userId":{"type":"string"},"pokemonName":{"type":"string"},"date":{"type":"string","format":"date-time"},"baseHP":{"type":"integer","format":"int32"},"baseAttack":{"type":"integer","format":"int32"},"baseDefense":{"type":"integer","format":"int32"},"baseSpeed":{"type":"integer","format":"int32"},"type":{"type":"string"},"totalRarity":{"type":"integer","format":"int32"},"frontDefault":{"type":"string"},"frontShiny":{"type":"string"},"legendary":{"type":"boolean"}}},"UserTotalResponse":{"type":"object","properties":{"total":{"type":"integer","format":"int32"}}},"InventoryEntity":{"type":"object","properties":{"id":{"type":"string","format":"uuid"},"userId":{"type":"string"},"pokemonName":{"type":"string"},"baseHP":{"type":"integer","format":"int32"},"baseAttack":{"type":"integer","format":"int32"},"baseDefense":{"type":"integer","format":"int32"},"baseSpeed":{"type":"integer","format":"int32"},"type":{"type":"string"},"totalRarity":{"type":"integer","format":"int32"},"frontDefault":{"type":"string"},"frontShiny":{"type":"string"},"legendary":{"type":"boolean"}}}}}}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+</body>
+</html>

@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.security.PublicKey;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -141,6 +142,11 @@ public class ManagerController {
             if (inventoryEntity.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NO_CONTENT).body("{\"warning\": \"No Content: Inventory with this ID does not exist\"}");
             }
+
+            if (!Objects.equals(inventoryEntity.get().getUserId(), userId)) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"error\": \"You can not trade Pokemon you do not own\"}");
+            }
+
             inventoryEntity.get().setUserId(newUserId);
             inventoryService.updateInventoryEntity(inventoryEntity.get());
 

@@ -9,7 +9,6 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:mysql://db-inventory:3306/pokemon_inventory_manager
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=password
-      - SELF_API_HOST=http://host.docker.internal:8890
     depends_on:
       - db-inventory
     volumes:

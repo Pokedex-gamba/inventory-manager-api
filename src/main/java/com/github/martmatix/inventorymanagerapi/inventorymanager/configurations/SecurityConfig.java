@@ -26,7 +26,7 @@ public class SecurityConfig {
                         .requestMatchers("/pokemon/inventory/getInventory",
                                 "/pokemon/inventory/getInventoryById",
                                 "/pokemon/inventory/getUserTotal",
-                                "/pokemon/inventory/getUserInventory").hasAuthority("svc::inventory_api::route::/pokemon/getInventory")
+                                "/pokemon/inventory/getUserInventory", "/pokemon/inventory/getById").hasAuthority("svc::inventory_api::route::/pokemon/getInventory")
                         .requestMatchers("/docs","/v3/api-docs").permitAll()
                 )
                 .csrf(AbstractHttpConfigurer::disable)

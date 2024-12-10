@@ -75,6 +75,10 @@ public class InventoryService {
                 ));
     }
 
+    public Optional<InventoryEntity> findByInventoryId(String inventory) {
+        return inventoryRepository.findByPokemonName(inventory);
+    }
+
     private List<UserInfoDTO> retrieveUserInfo(String authHeader) {
         WebClient webClient = builder.baseUrl(userInfoApiUrl).build();
 

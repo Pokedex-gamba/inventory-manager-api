@@ -17,4 +17,6 @@ public interface InventoryRepository extends JpaRepository<InventoryEntity, UUID
     @Query(value = "select user_id, sum(total_rarity) from inventory group by user_id", nativeQuery = true)
     List<Object[]> findUserTotal();
 
+    Optional<InventoryEntity> findByPokemonName(String pokemonName);
+
 }

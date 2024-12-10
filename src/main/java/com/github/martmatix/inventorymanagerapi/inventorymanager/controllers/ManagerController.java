@@ -156,6 +156,31 @@ public class ManagerController {
         }
     }
 
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = InventoryEntity.class))
+            )
+    })
+    @GetMapping("/pokemon/inventory/getById")
+    public ResponseEntity<?> getInventoryById(@RequestParam("inventory") String inventoryId, @RequestHeader("Authorization") String authHeader) {
+        if (inventoryId == null || inventoryId.isEmpty() || inventoryId.isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"error\": \"Inventory ID Is Missing In Request\"}");
+        }
+        String userId = getUserIdFromToken(authHeader);
+        if (userId.equals(ErrorCodes.TOKEN_EXTRACTION_ERROR.getCode())) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"error\": \"Unable To Process Request: " + ErrorCodes.TOKEN_EXTRACTION_ERROR.getCode() + "\"}");
+        }
+        if (userId.equals(ErrorCodes.PUBLIC_NOT_FOUND.getCode())) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"error\": \"Unable To Process Request: " + ErrorCodes.PUBLIC_NOT_FOUND.getCode() + "\"}");
+        }
+        Optional<InventoryEntity> inventoryEntity = inventoryService.findByInventoryId(inventoryId);
+        if (inventoryEntity.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"warning\": \"Pokemon With This ID Does Not Exist\"}");
+        }
+        return ResponseEntity.ok(inventoryEntity.get());
+    }
+
     private String getUserIdFromToken(String authHeader) {
         String token = authHeader.replace("Bearer", "").trim();
 

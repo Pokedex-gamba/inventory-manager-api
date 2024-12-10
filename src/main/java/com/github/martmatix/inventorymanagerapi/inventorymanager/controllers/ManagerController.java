@@ -91,7 +91,7 @@ public class ManagerController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"error\": \"Unable To Process Request: " + ErrorCodes.PUBLIC_NOT_FOUND.getCode() + "\"}");
         }
 
-        return ResponseEntity.ok(inventoryService.findUserTotal());
+        return ResponseEntity.ok(inventoryService.findUserTotal(authHeader));
     }
 
     @ApiResponses(value = {
